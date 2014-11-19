@@ -92,6 +92,13 @@ struct
       in
         x' @ comp @ y' @ labelAndJump @ elseC @ endLabel
       end
+    | convertToC0 valList (Case $ [x,y,z]) =
+      let
+        val left = Pr L $$ [x]
+        val right = Pr R $$ [x]
+      in 
+        convertToC0 valList (Ifz $ [left, Let $$ [right, y], \\(Var.newvar "hi" , Let $$ [right, z])])
+      end
     | convertToC0 valList _ = raise Fail "Die"
 
   fun eval s =
