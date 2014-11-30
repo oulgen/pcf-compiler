@@ -1,0 +1,226 @@
+\documentclass{acm_proc_article-sp}
+
+\usepackage{fancyvrb}
+\usepackage{mathpartir}
+\usepackage{code,proof,amssymb,amsmath,stmaryrd}
+
+\input{commands.tex}
+
+\newcommand{\ccb}{\texttt{C0} bytecode }
+\newcommand{\m}[1]{\texttt{#1}}
+\newcommand{\ccbi}{\texttt{C0} bytecode}
+\newcommand{\clac}{{\em CLAC} language }
+\newcommand{\claci}{{\em CLAC} language}
+
+\begin{document}
+
+\title{Compiling Functional Programs to C0 Bytecode}
+
+\numberofauthors{1}
+\author{
+\alignauthor
+Oguz Ulgen\\
+       \affaddr{Carnegie Mellon University}\\
+       \email{oulgen@andrew.cmu.edu}
+}
+
+\date{\today}
+
+\maketitle
+\begin{abstract}
+Hi, this is my abstract.
+\end{abstract}
+
+\terms{Theory, Languages, Compilers}
+
+\keywords{Language definitions, functional programming, C0, bytecode}
+
+\section{Introduction}
+Compilers are written to convert a source language to a target language. For practical purposes, the target language is always either a binary form that is referred as object code or an intermediary language that can than recompiled into a binary form. The first case is straight forward since the conversion is done from the source into machine readable format. However, the latter case is not as simple. In most applications, compiler designers chose to compile down to an intermediate language in order to use a highly optimized compiler to generate the machine readable binary form. This intermediate language is generally \texttt{LLVM} language or assembly language.
+
+In this paper, we chose to use \ccb as our intermediate language. It is possible to read about this language on \texttt{http://c0.typesafety.net/}.
+
+Another choice we have made is to compile a functional language, specifically a PCF (Programming Computable Functions) language.
+
+\section{Stack Based Implementation of an interpreter for the {\secit CLAC} Language}
+Before moving on to implementing a compiler for the PCF language, we chose to write an interpreter for the \claci. The reason for making this decision stems from the fact that both \clac and \ccb have a stack based procedure for evaluation.
+
+\begin{figure}
+\centering
+\begin{BVerbatim}
+Clac ::= Num Int
+          | Op Op
+          | Pair
+          | Prj1
+          | Prj2
+          | If
+          | Skip
+
+Op ::= Add | Sub | Mult | Div
+\end{BVerbatim}
+\caption{The \clac definition}
+\end{figure}
+
+\begin{figure}
+{\small
+\[
+\begin{array}{rclcrcll}
+\multicolumn{3}{c}{\bf Before ~~}  & & \multicolumn{3}{c}{\bf \qquad\quad~~ After} \\ 
+\mbox{\bf Stack} & & \mbox{\bf Queue} & & \mbox{\bf Stack} & & {\bf Queue} \\ \hline
+%%%%
+%%%% Already implemented
+%%%% 
+S            & \mid\mid & n, Q & \longrightarrow &
+S, n         & \mid\mid & Q
+\\ \hline
+%%%%
+%%%% Arith operations
+%%%% 
+S, x, y      & \mid\mid & \mbox{\texttt{+}}, Q & \longrightarrow & 
+S, x\,{+}\,y & \mid\mid & Q
+\\
+S, x, y      & \mid\mid & \mbox{\texttt{-}}, Q & \longrightarrow & 
+S, x\,{-}\,y & \mid\mid & Q
+\\
+S, x, y      & \mid\mid & \mbox{\texttt{*}}, Q & \longrightarrow & 
+S, x\,{*}\,y & \mid\mid & Q
+\\
+S, x, y      & \mid\mid & \mbox{\texttt{/}}, Q & \longrightarrow & 
+S, x\,{/}\,y & \mid\mid & Q
+\\ \hline
+S, x, y         & \mid\mid & \texttt{Pair}, Q & \longrightarrow & S, \langle x, y\rangle & \mid\mid & Q
+\\
+S, \langle x, y\rangle         & \mid\mid & \texttt{Prj1}, Q & \longrightarrow & S, x & \mid\mid & Q
+\\
+S, \langle x, y\rangle         & \mid\mid & \texttt{Prj2}, Q & \longrightarrow & S, y & \mid\mid & Q
+\\
+S, 0 & \mid\mid & \texttt{If}, \textit{tok}_1, \textit{tok}_2, Q & \longrightarrow & S, \textit{tok}_1 & \mid\mid & Q
+\\
+S, 1 & \mid\mid & \texttt{If}, \textit{tok}_1, \textit{tok}_2, Q & \longrightarrow & S, \textit{tok}_2 & \mid\mid & Q
+\\
+S, n         & \mid\mid & \texttt{Skip}, Q & \longrightarrow & S & \mid\mid & Q[n:end]
+\end{array}
+\]}
+\caption{Stack/queue based Clac reference}
+\end{figure}
+
+The resemblance between \clac and \ccb enables us to consider \ccb at a more abstract way by just looking at a significantly smaller language that is \claci.
+
+\section{Compilation to {\secit C0} bytecode}
+In order to discuss the process of compilation of PCF to \ccbi, we must first formally define the PCF language. 
+\begin{figure}
+\[
+\begin{array}{c c l l}
+\ms{Exp} & e     & ::= \\
+	      &     &\zero                     & \zero\\
+                &    & \suc(e)                   & \suc(e)\\
+                &    & \ifz(e;e_0;x.e_1)         & \ifz ~e~ \{z \goesto e_0 \mid \suc(x) \goesto e_1\}\\
+                &    & \lam[\tau](x.e)           & \irl{fn}\,(x : \tau)\,e\\
+                &    & \letexp{x}{e_1}{e_2}      & \letbind{x}{e_1}{e_2} \\
+                &    & \irl{pair}(e_1;e_2) & \pair{e_1}{e_2}\\
+                &    & \irl{pr[l]}(e)        & e \cdot \irl{l}\\
+                &    & \irl{pr[r]}(e)        & e \cdot \irl{r}\\
+                &    & \inlt(e)        & \irl{inl}[\tau_1; \tau_2] ~e\\
+                &    & \inrt(e)        & \irl{inr}[\tau_1; \tau_2] ~e\\
+                &    & \ecase(e; x_1.e_1; x_2.e_2)  & \ecase~e~\{\irl{inl}~x_1 \goesto e_1 \\
+                &	&	&~~~~~~~~~\mid \irl{inr}~x_2 \goesto e_2\}
+\end{array}
+\]
+\caption{PCF language reference}
+\end{figure}
+\subsection{Language Constructors}
+In our representation of PCF language, we have used the following primitives: \m{void}, \m{unit} and \m{nat}. From these primitives, we have constructed sum and product types which we are shown as \m{pair} and \m{sum}. These primitives and constructed types enabled us to implement \m{projections} and \m{injections}. Finally, through these high level constructs, we have implemented \m{let} bindings, \m{lambda} abstractions and \m{case} matching. (If zero statement, i.e. \m{ifz}, remains to be a sub part of \m{case} matching.)
+\subsection{Representations}
+At this part, it is essential to discuss how we introduce and eliminate these operations on the primitives. Appendix contains all the introduction and eliminations rules.
+
+A very short overview of this process can be done through considering a single connective. For the sake of an example, we are going to consider \m{pair}.
+\begin{mathpar}
+\small
+~~~~~~
+\inferrule{
+    \typeJC{e_1}{\tau_1} \and
+    \typeJC{e_2}{\tau_2}
+}{
+    \typeJC{\pair{e_1}{e_2}}{\prodt{\tau_1}{\tau_2}}
+} (\m{pair}\intro)
+~~~~~~
+\end{mathpar}
+\begin{mathpar}
+\small
+\left[ \inferrule{
+    \typeJC{e}{\tau_1 \times \tau_2}
+}{
+    \typeJC{\prl(e)}{\tau_1}
+} (\m{pair}\elim_1) \right]
+~~~~~~
+\left[ \inferrule{
+    \typeJC{e}{\tau_1 \times \tau_2}
+}{
+    \typeJC{\prr(e)}{\tau_2}
+} (\m{pair}\elim_2) \right]
+\end{mathpar}
+
+Basically, given two expressions of type $\tau_1$ and $\tau_2$, we can use \m{pair-I} which is the pair introduction rule to create a pair of type $\prodt{\tau_1}{\tau_2}$.
+
+Now that we have a pair, we would like to eliminate it in order to get back the left or the right element of the pair. We can do this by eliminating the \m{pair} constructor with the \m{projection} constructor. There are two elimination rules for pair and they evaluate to the left or the right element of the pair. These rules are $\m{pair}\elim_1$ and $\m{pair}\elim_2$ in respective order. They project the left or right element depending on which rule is chosen.
+
+Rest of the introduction and elimination rules are similar and can easily be understood by looking at the appendix.
+
+\subsection{Translation}
+Now that the typing rules are introduced, we can proceed to the actual translation of the PCF language to \ccbi. First and foremost, we need to learn about the \ccbi. A strict subset of the \ccb instruction set is given in the appendix of this paper.
+
+The second step would be to learn and understand the translation process. For this, for the sake of consistency, we will again be talking about the connective \m{pair} as well as some other interesting aspects of other connectives.
+
+The following bytecode sequence is used to create any expression given in the form $\langle e_1, e_2\rangle : \tau_1 \times \tau_2$.
+\begin{verbatim}
+ BB 10       # new 16          
+ 18 59       # dup             
+<bytecode instructions for e1>
+ 20 4F       # amstore      
+ 21 59       # dup             
+ 22 62 08    # aaddf 8    
+<bytecode instructions for e2>         
+ 26 4F       # amstore      
+ 27 B0       # return 
+\end{verbatim}
+
+Basically, what we are doing in this case is we are first allocating an array of size 16 which is enough space to hold two 8 byte pointers. Then we are storing the pointer to $e_1 : \tau_1$ as the first 8 bytes of the array as well as pointer to $e_2 : \tau_2$ as the second 8 bytes of the array. We are doing this process without using any local variables, hence arises the need to duplicate the pointer to the head of the pair structure, in this case it is a 16 byte array.
+
+If we wanted to eliminate the pair, we would need to do so by eliminating it with a projection constructor. Turns out eliminating a pair is significantly simpler than introducing one. If we wanted to get the left projection $e_1 : \tau_1$ of the pair $\langle e_1, e_2\rangle : \tau_1 \times \tau_2$, we simply follow the following bytecode instructions.
+
+\begin{verbatim}
+<bytecode for creating the pair>
+2F       # amload        
+\end{verbatim}
+
+Here what we are doing is just accessing the first 8 bytes of the array since we are looking for the left projection. 
+
+Similarly, if we wanted to get the right projection $e_e : \tau_e$ of the pair $\langle e_1, e_2\rangle : \tau_1 \times \tau_2$, then we do:
+
+\begin{verbatim}
+<bytecode for creating the pair>
+ 62 08    # aaddf 8     
+ 28 2F    # amload  
+\end{verbatim}
+
+Since this time we are looking for the right projection of the array, we first need to move our pointer by 8 bytes and then access the first 8 bytes of the array.
+
+In addition to \m{pair}, another interesting connective that this paper wants to touch upon is \m{let} bindings because \m{let} bindings use an interesting conversion process to \m{lambda} expressions as well as they make use of local variables.
+
+STUFF ABOUT LET
+
+\section{Interesting decisions of the compilation}
+In this section, we are going talk about interesting decision we as the authors of this paper had to make while creating this project.
+\subsection{Meta Bytecode Instructions}
+
+\subsection{Type Checking in Bytecode Instruction Level}
+
+\section{Conclusions}
+
+\section{Acknowledgments}
+
+\section{Appendix}
+\input{appendix.tex}
+
+\end{document}
+
