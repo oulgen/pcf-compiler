@@ -1,0 +1,80 @@
+\newcommand{\qbox}{\fbox{???}}
+
+\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\irl}[1]{\mathtt{#1}}
+\newcommand{\lpcf}{\mathcal{L}\{\mathtt{nat}\,{\rightharpoonup}\}}
+\newcommand{\lstlc}{\mathcal{L}\{\mathtt{nat}\,{\rightarrow}\}}
+
+\newcommand{\letbind}[3]{\irl{let}~#1=#2~\irl{in}~#3}
+\newcommand{\letexp}[3]{\irl{let}(#2; \abst{#1}{#3})}
+\newcommand{\lam}{\irl{lam}}
+\newcommand{\fix}{\irl{fix}}
+\newcommand{\parr}[2]{#1 \rightharpoonup #2}
+\newcommand{\pair}[2]{\langle #1, #2 \rangle}
+\newcommand{\triv}{\langle \rangle}
+\newcommand{\prl}{\irl{pr[l]}}
+\newcommand{\prr}{\irl{pr[r]}}
+\newcommand{\match}{\irl{match}}
+\newcommand{\matche}[1]{\match~#1~}
+\newcommand{\matchexp}[2]{\matche{#1}\{#2\}}
+\newcommand{\wild}{\irl{wild}}
+\newcommand{\zero}{\irl{z}}
+\newcommand{\suc}{\irl{s}}
+
+\newcommand{\natt}{\irl{nat}}
+\newcommand{\unitt}{\irl{unit}}
+\newcommand{\prodt}[2]{#1\times#2}
+\newcommand{\voidt}{\irl{void}}
+\newcommand{\sumt}[2]{#1 + #2}
+
+\newcommand{\intro}{\text{-I}}
+\newcommand{\elim}{\text{-E}}
+
+\newcommand{\val}[1]{\ensuremath{#1~\mathsf{val}}}
+\newcommand{\abst}[2]{#1.#2}
+\newcommand{\steps}[2]{#1 \mapsto #2}
+\newcommand{\subst}[3]{[#1/#2]#3}
+\newcommand{\err}[1]{\ensuremath{#1~\mathsf{err}}}
+
+\newcommand{\goesto}{\Rightarrow}
+\newcommand{\abort}[2]{\irl{abort}[#1](#2)}
+\newcommand{\ecase}{\irl{case}}
+\newcommand{\ifz}{\irl{ifz}}
+\newcommand{\inlt}{\irl{in}[\tau_1;\tau_2][\irl{l}]}
+\newcommand{\inrt}{\irl{in}[\tau_1;\tau_2][\irl{r}]}
+\newcommand{\inl}{\irl{inl}}
+\newcommand{\inr}{\irl{inr}}
+
+
+\newcommand{\proves}{\vdash}
+\newcommand{\hasType}[2]{#1 : #2}
+\newcommand{\typeJ}[3]{#1 \proves \hasType{#2}{#3}}
+\newcommand{\ctx}{\Gamma}
+\newcommand{\emptyCtx}{\emptyset}
+\newcommand{\xCtx}[2]{\ctx, \hasType{#1}{#2}}
+\newcommand{\typeJC}[2]{\typeJ{\ctx}{#1}{#2}}
+
+\newcommand{\lctx}{\Lambda}
+\newcommand{\patJ}[3]{#1 \Vdash \hasType{#2}{#3}}
+\newcommand{\patJC}[2]{\patJ{\lctx}{#1}{#2}}
+\newcommand{\transforms}{\rightsquigarrow}
+\newcommand{\hooksto}{\hookrightarrow}
+
+\newcommand{\tlrule}{\theta\Lambda}
+\newcommand{\valrule}{\ensuremath{\mathsf{v}}}
+\newcommand{\progrule}{\ensuremath{\mathsf{s}}}
+\newcommand{\elimrule}{\ensuremath{\mathsf{e}}}
+
+\newcommand{\matchJ}[3]{#1 \Vdash #2 \lhd #3}
+\newcommand{\matchJC}[2]{\matchJ{\theta}{#1}{#2}}
+\newcommand{\notmatchJ}[2]{#1 \bot #2}
+
+\newcommand{\laz}[1]{\left[ #1 \right]}
+
+
+
+\newcommand{\nmod}{~\mathtt{mod}~}
+\newcommand{\ndiv}{~\mathtt{div}~}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}

@@ -5,7 +5,8 @@ Session.vim
 .netrwhist
 *~
 *.bc0
-*.pdf
-*.jpg
-*.jpeg
+/*/*.pdf
+/*/*.jpg
+/*/*.jpeg
 .cm
+.DS_STORE

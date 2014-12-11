@@ -1,0 +1,458 @@
+\documentclass{acm_proc_article-sp}
+
+\usepackage{fancyvrb}
+\usepackage{mathpartir}
+\usepackage{code,proof,amssymb,amsmath,stmaryrd}
+
+\input{commands.tex}
+
+\newcommand{\ccb}{\texttt{C0} bytecode }
+\newcommand{\m}[1]{\texttt{#1}}
+\newcommand{\ccbi}{\texttt{C0} bytecode}
+\newcommand{\clac}{{\em CLAC} language }
+\newcommand{\claci}{{\em CLAC} language}
+
+\begin{document}
+
+\title{Compiling Functional Programs to C0 Bytecode}
+
+\numberofauthors{1}
+\author{
+\alignauthor
+Oguz Ulgen\\
+       \affaddr{Carnegie Mellon University}\\
+       \email{oulgen@andrew.cmu.edu}
+}
+
+\date{\today}
+
+\maketitle
+\begin{abstract}
+We have written a compiler that translates the PCF language into \texttt{C0} language. Our translation does not include fix points and lambda expressions.
+\end{abstract}
+
+\terms{Theory, Languages, Compilers}
+
+\keywords{Language definitions, functional programming, C0, bytecode}
+
+\section{Introduction}
+Compilers are written to convert a source language to a target language. For practical purposes, the target language is always either a binary form that is referred as object code or an intermediary language that can then be recompiled into a binary form. The first case is straight forward since the conversion is done from the source into machine readable format. However, the latter case is not as simple. In most applications, compiler designers chose to compile down to an intermediate language in order to use a highly optimized compiler to generate the machine readable binary form. This intermediate language is generally \texttt{LLVM} language or assembly language.
+
+In this paper, we chose to use \ccb as our intermediate language. It is possible to read about this language on \texttt{http://c0.typesafety.net/}.
+
+Another choice we have made is to compile a functional language, specifically a PCF (Programming Computable Functions) language.
+
+%\section{Stack Based Implementation of an interpreter for the {\secit CLAC} Language}
+%Before moving on to implementing a compiler for the PCF language, we chose to write an interpreter for the \claci. The reason for making this decision stems from the fact that both \clac and \ccb have a stack based procedure for evaluation.
+%
+%\begin{figure}
+%\centering
+%\begin{BVerbatim}
+%Clac ::= Num Int
+%          | Op Op
+%          | Pair
+%          | Prj1
+%          | Prj2
+%          | If
+%          | Skip
+%
+%Op ::= Add | Sub | Mult | Div
+%\end{BVerbatim}
+%\caption{The \clac definition}
+%\end{figure}
+%
+%\begin{figure}
+%{\small
+%\[
+%\begin{array}{rclcrcll}
+%\multicolumn{3}{c}{\bf Before ~~}  & & \multicolumn{3}{c}{\bf \qquad\quad~~ After} \\ 
+%\mbox{\bf Stack} & & \mbox{\bf Queue} & & \mbox{\bf Stack} & & {\bf Queue} \\ \hline
+%%%%
+%%%% Already implemented
+%%%% 
+%S            & \mid\mid & n, Q & \longrightarrow &
+%S, n         & \mid\mid & Q
+%\\ \hline
+%%%%
+%%%% Arith operations
+%%%% 
+%S, x, y      & \mid\mid & \mbox{\texttt{+}}, Q & \longrightarrow & 
+%S, x\,{+}\,y & \mid\mid & Q
+%\\
+%S, x, y      & \mid\mid & \mbox{\texttt{-}}, Q & \longrightarrow & 
+%S, x\,{-}\,y & \mid\mid & Q
+%\\
+%S, x, y      & \mid\mid & \mbox{\texttt{*}}, Q & \longrightarrow & 
+%S, x\,{*}\,y & \mid\mid & Q
+%\\
+%S, x, y      & \mid\mid & \mbox{\texttt{/}}, Q & \longrightarrow & 
+%S, x\,{/}\,y & \mid\mid & Q
+%\\ \hline
+%S, x, y         & \mid\mid & \texttt{Pair}, Q & \longrightarrow & S, \langle x, y\rangle & \mid\mid & Q
+%\\
+%S, \langle x, y\rangle         & \mid\mid & \texttt{Prj1}, Q & \longrightarrow & S, x & \mid\mid & Q
+%\\
+%S, \langle x, y\rangle         & \mid\mid & \texttt{Prj2}, Q & \longrightarrow & S, y & \mid\mid & Q
+%\\
+%S, 0 & \mid\mid & \texttt{If}, \textit{tok}_1, \textit{tok}_2, Q & \longrightarrow & S, \textit{tok}_1 & \mid\mid & Q
+%\\
+%S, 1 & \mid\mid & \texttt{If}, \textit{tok}_1, \textit{tok}_2, Q & \longrightarrow & S, \textit{tok}_2 & \mid\mid & Q
+%\\
+%S, n         & \mid\mid & \texttt{Skip}, Q & \longrightarrow & S & \mid\mid & Q[n:end]
+%\end{array}
+%\]}
+%\caption{Stack/queue based Clac reference}
+%\end{figure}
+%
+%The resemblance between \clac and \ccb enables us to consider \ccb at a more abstract way by just looking at a significantly smaller language that is \claci.
+
+\section{Compilation to {\secit C0} bytecode}
+In order to discuss the process of compilation of PCF to \ccbi, we must first formally define the PCF language.
+\begin{figure}[h]
+\[
+\begin{array}{c c l l}
+\ms{Exp} & e     & ::= \\
+	      &     &\zero                     & \zero\\
+                &    & \suc(e)                   & \suc(e)\\
+                &    & \ifz(e;e_0;x.e_1)         & \ifz ~e~ \{z \goesto e_0 \mid \suc(x) \goesto e_1\}\\
+                &    & \lam[\tau](x.e)           & \irl{fn}\,(x : \tau)\,e\\
+                &    & \letexp{x}{e_1}{e_2}      & \letbind{x}{e_1}{e_2} \\
+                &    & \irl{pair}(e_1;e_2) & \pair{e_1}{e_2}\\
+                &    & \irl{pr[l]}(e)        & e \cdot \irl{l}\\
+                &    & \irl{pr[r]}(e)        & e \cdot \irl{r}\\
+                &    & \inlt(e)        & \irl{inl}[\tau_1; \tau_2] ~e\\
+                &    & \inrt(e)        & \irl{inr}[\tau_1; \tau_2] ~e\\
+                &    & \ecase(e; x_1.e_1; x_2.e_2)  & \ecase~e~\{\irl{inl}~x_1 \goesto e_1 \\
+                &	&	&~~~~~~~~~\mid \irl{inr}~x_2 \goesto e_2\}
+\end{array}
+\]
+\caption{PCF language reference}
+\end{figure}
+
+One additional consideration we must think about is that all \texttt{C0} values are 8 bytes and this means that during the translation, we need to be able to represent all the values in PCF with only 8 bytes.
+
+For the next few sections, we are going to talk about language constructors, i.e. what is a value of this type in PCF and \texttt{C0VM}, representations, i.e. what are the introduction and elimination rules, and translation, i.e. how do we translate introductions and eliminations to \ccbi.
+
+\subsection{Nats}
+\subsubsection{Language Constructors}
+\m{nats} are represented as integers in \ccbi. Basically, \m{z} corresponds to $0$ and \m{s N} where $\m{N} : nat$ corresponds to $\m{N} + 1$. One important aspect we must mention is \m{C0VM} is a 32-bit system. This means that we only have integers up to $2^{31} - 1$. After this point, integers round back to $-2^{31}$. This means that we don't have an infinite natural number system like PCF.
+
+\subsubsection{Representations}
+There are two introduction and one elimination rules for nats.
+\begin{mathpar}
+\small
+\inferrule{ }{\typeJC{\zero}{\natt}} (\natt\intro_1)
+
+\inferrule{
+\typeJC{e}{\natt}
+}{
+\typeJC{\suc(e)}{\natt}
+} (\natt\intro_2)
+
+\inferrule{
+\typeJC{e}{\natt}\\
+\typeJC{e_0}{\tau}\\
+\typeJ{\ctx, \hasType{x}{\natt}}{e_1}{\tau}
+}{
+\typeJC{\ifz(e;e_0;x.e_1)}{\tau}
+} (\natt\elim)
+\end{mathpar}
+
+\subsubsection{Translation}
+Now that the typing rules are introduced, we can proceed to the actual translation of the \m{Pair} construct to \ccbi.
+
+The following sequence of bytecode instructions is used to create $z : nat$.
+
+\begin{verbatim}
+ 10 00    # bipush 0
+\end{verbatim}
+
+The following sequence of bytecode instructions is used to create the successor operation which is $s(e): nat$ where $e : nat$.
+
+\begin{verbatim}
+<bytecode instructions for e>
+ 18 10 01    # bipush 1
+ 19 60       # iadd
+\end{verbatim}
+
+We also have an elimination for the type $nat$ which is $\ifz$. The following is the sequence of bytecode instructions for $\ifz ~e~ \{z \goesto e_0 \mid \suc(x) \goesto e_1\}$.
+
+\begin{verbatim}
+ <bytecode instructions for the nat to eliminate>
+ 18 10 00    # bipush 0        # comp to 0
+ 19 9F 00 06 # if_cmpeq +6     # comp
+ 20 A7 00 08 # goto +8         # go
+ 21 # then
+ <bytecode instructions for e0>
+ 23 A7 00 0C # goto +12        # go
+ 24 # else
+ 25 10 00    # bipush 0        # zero
+ 26 10 01    # bipush 1        # one
+ 27 64       # isub            # sub
+ 28 36 00    # vstore 0        # store
+ <bytecode instructions for e1>
+ <it can use the local variable>
+ 30 # end
+\end{verbatim}
+
+As seen in the code, one difference for $\ifz$ is that its translation uses if statements and local variables. If statements are very straight forward and local variables will be introduced and explained thoroughly in the discussion of \m{let} expressions.
+
+\subsection{Pair}
+\subsubsection{Language Constructors}
+Pair is represented as a \m{C0} value in \m{C0VM} because it is ultimately a pointer to an array that holds two pointers which point to the left and right elements of the pair.
+
+\subsubsection{Representations}
+\m{Pair} has one introduction and two elimination rules.
+\begin{mathpar}
+\small
+~~~~~~
+\inferrule{
+    \typeJC{e_1}{\tau_1} \and
+    \typeJC{e_2}{\tau_2}
+}{
+    \typeJC{\pair{e_1}{e_2}}{\prodt{\tau_1}{\tau_2}}
+} (\m{pair}\intro)
+~~~~~~
+\end{mathpar}
+\begin{mathpar}
+\small
+\inferrule{
+    \typeJC{e}{\tau_1 \times \tau_2}
+}{
+    \typeJC{\prl(e)}{\tau_1}
+} (\m{pair}\elim_1)
+~~~~~~
+\inferrule{
+    \typeJC{e}{\tau_1 \times \tau_2}
+}{
+    \typeJC{\prr(e)}{\tau_2}
+} (\m{pair}\elim_2)
+\end{mathpar}
+
+Basically, given two expressions of type $\tau_1$ and $\tau_2$, we can use \m{pair-I} which is the pair introduction rule to create a pair of type $\prodt{\tau_1}{\tau_2}$.
+
+Now that we have a pair, we would like to eliminate it in order to get back the left or the right element of the pair. We can do this by eliminating the \m{pair} constructor with the \m{projection} constructor. There are two elimination rules for pair and they evaluate to the left or the right element of the pair. These rules are $\m{pair}\elim_1$ and $\m{pair}\elim_2$ in respective order. They project the left or right element depending on which rule is chosen.
+\subsubsection{Translation}
+Now that the typing rules are introduced, we can proceed to the actual translation of the \m{Pair} construct to \ccbi.
+
+The following bytecode sequence is used to create any expression given in the form $\langle e_1, e_2\rangle : \tau_1 \times \tau_2$.
+\begin{verbatim}
+ BB 10       # new 16          
+ 18 59       # dup             
+<bytecode instructions for e1>
+ 20 4F       # amstore      
+ 21 59       # dup             
+ 22 62 08    # aaddf 8    
+<bytecode instructions for e2>         
+ 26 4F       # amstore      
+\end{verbatim}
+
+What we are doing in this case is we are first allocating an array of size 16 which is enough space to hold two 8 byte pointers. Then we are storing the pointer to $e_1 : \tau_1$ as the first 8 bytes of the array as well as pointer to $e_2 : \tau_2$ as the second 8 bytes of the array. We are doing this process without using any local variables, hence arises the need to duplicate the pointer to the head of the pair structure, in this case it is a 16 byte array.
+
+If we wanted to eliminate the pair, we would need to do so by eliminating it with a projection constructor. Turns out eliminating a pair is significantly simpler than introducing one. If we wanted to get the left projection $e_1 : \tau_1$ of the pair $\langle e_1, e_2\rangle : \tau_1 \times \tau_2$, we simply follow the following bytecode instructions.
+
+\begin{verbatim}
+<bytecode for creating the pair>
+2F       # amload        
+\end{verbatim}
+
+Here what we are doing is just accessing the first 8 bytes of the array since we are looking for the left projection. 
+
+Similarly, if we wanted to get the right projection $e_e : \tau_e$ of the pair $\langle e_1, e_2\rangle : \tau_1 \times \tau_2$, then we do:
+
+\begin{verbatim}
+<bytecode for creating the pair>
+ 62 08    # aaddf 8     
+ 28 2F    # amload  
+\end{verbatim}
+
+Since this time we are looking for the right projection of the array, we first need to move our pointer by 8 bytes and then access the first 8 bytes of the array.
+
+\subsection{Let}
+\subsubsection{Language Constructors}
+\m{Let} expressions are also converted into 8 byte \m{C0} values. This conversion processes will be explained in depth in the translation section.
+\subsubsection{Representations}
+\m{Let} bindings only have an introduction rule because they don't need to be eliminated. They will simply be stepped into another expression or be evaluated into a value.
+
+\begin{mathpar}
+\inferrule{
+	\typeJC{e_1}{\tau_1}\\
+	\typeJ{\ctx, \hasType{x}{\tau_1}}{e_2}{\tau}
+}{
+	\typeJC{\letexp{x}{e_1}{e_2}}{\tau}
+} (\text{let})
+\end{mathpar}
+
+\subsubsection{Translation}
+In addition to \m{nats} and \m{pair}, another interesting connective that this paper wants to touch upon is \m{let} bindings because \m{let} bindings introduce local variables.
+
+For the sake of discussion, take the following code snippet where $e_1$ and $e_2$ are ground values or expressions.
+\begin{verbatim}
+let
+    val x = e1
+    val y = e2
+in
+    <x, y>
+end
+\end{verbatim}
+
+This \m{let} expressions initially gets translated into
+$$\m{let}(x.~\m{let}(y.~\langle x,y\rangle))~e_1 ~ e_2$$
+After this translation, we need to deal with non free variables. In order to do so, we make use of \m{C0} virtual machine's local variable stack. Programmatically, we first determine all the variables that could be bound in the given expressions and index them over an array. This method enables us to have a distinct numbering for each potential free variable.
+
+Here, we are not doing liveness analysis, thus we are upper bounding the number of variables we have. One caveat of this methodology is that we use more space than we actually need to but this significantly eases the process of dealing with local/bound variables.
+
+Now, that we have a better view of what is happening in this code snippet, it is crucial to talk about how the translation is done. The following sequence of bytecode is how we translate the previous \m{let} expression.
+
+\begin{verbatim}
+<bytecode instructions for e1>
+ 20 36 00    # vstore 0
+<bytecode instructions for e2>
+ 22 36 01    # vstore 1
+ 23 BB 10    # new 16
+ 24 59       # dup          
+ 25 15 00    # vload 0 
+ 26 4F       # amstore  
+ 27 59       # dup          
+ 28 62 08    # aaddf 8 
+ 29 15 01    # vload 1 
+ 30 4F       # amstore 
+\end{verbatim}
+
+Here, essentially what we are doing is generating the bytecode instruction sequence for $e_1$ and $e_2$ and storing them at their pre-determined destinations. Afterwards, we are generating the bytecode sequence for what is in the conclusion part of the \m{let} expression, i.e. in between \m{in} and \m{end}. For this example, we just created a pair out of them.
+
+\subsection{Rest}
+\subsubsection{Language Constructors}
+Similar to what we have seen so far, every PCF expression can be converted to an 8 byte \m{C0} value.
+\subsubsection{Representations}
+The rest of the introduction and elimination rules are similar and easily be understood by looking at the appendix.
+\subsubsection{Translation}
+For the remaining PCF expressions, their translation is very similar to those we have seen so far.
+
+\subsection{Complete Program}
+In this section, we are going to give an example of a complete \ccb translation.
+
+Given the following PCF expression:
+
+\begin{verbatim}
+let
+    val x = z
+    val y = s z
+in
+    <x, y>.r
+end
+\end{verbatim}
+
+We generate the following sequence of \ccb intructions:
+
+\begin{verbatim}
+C0 C0 FF EE       # magic number
+00 09             # version 4, arch = 1 (64 bits)
+
+00 00             # int pool count
+# int pool
+
+00 00             # string pool total size
+# string pool
+
+00 01             # function count
+# function_pool
+
+#<main>
+00 00             # number of arguments = 0
+00 02             # number of local variables = 2
+00 1B             # code length = 27 bytes
+10 00    # bipush 0        # zero
+36 00    # vstore 0        # store
+10 00    # bipush 0        # zero
+10 01    # bipush 1        # one
+60       # iadd            # add
+36 01    # vstore 1        # store
+BB 10    # new 16          # alloc
+59       # dup             # dup
+15 00    # vload 0         # load
+4F       # amstore         # store
+59       # dup             # dup
+62 08    # aaddf 8         # offset
+15 01    # vload 1         # load
+4F       # amstore         # store
+62 08    # aaddf 8         # offset
+2F       # amload          # load
+B0       # return          # ret
+\end{verbatim}
+
+What we are doing here is that we are binding \m{z} to x and \m{s z} to y and then creating the pair $\langle x, y\rangle : \m{nat} \times \m{nat}$ and then projecting the right component out.
+
+When we run this sequence of bytecode instructions, we get $1$ as the return value.
+
+\section{Design decisions}
+In this section, we are going talk about interesting decision we as the authors of this paper had to make while creating this project.
+\subsection{Meta Bytecode Instructions}
+Before starting the implementation process, we as the authors of this paper, decided that if we have a stack of $S, e_1, e_2 \mid \m{Pair}$ where \m{Pair} is a special pair the previous two expressions instruction, we could take the previous two expressions and pair them up. Turns out doing this operation is not only expensive but also it requires us to have more bytecode instructions such as \m{rot} which given a stack $S, x, y, z \mid \m{rot}$ it changes the stack to $S, z, y, x \mid$.
+
+Our approach to dealing with this problem is creating a meta \ccb instruction called \m{Pair}$(e_1 : \tau_1, e_2 : \tau_2)$ which creates the sequence of bytecode instructions for $\langle e_1, e_2\rangle : \tau_1 \times \tau_2$.
+
+We can see the difference of the instructions for each of the methods. Left column of the table contains the instructions for take previous two expressions and make a pair out of them and the right hand side contains the \m{Pair}$(e_1 : \tau_1, e_2 : \tau_2)$ meta-instruction.
+
+\begin{center}
+{\ttfamily                           
+\begin{tabular}{c | c}
+\hline
+\multicolumn{2}{c}{Comparison}             \\
+\hline
+$S, e_1, e_2 \mid \m{Pair}$    & \m{Pair}$(e_1 : \tau_1, e_2 : \tau_2)$ \\
+\hline
+x & new 16 \\
+y & dup\\
+new 16 & x\\
+dup & amstore\\
+aaddf 8 & dup\\
+rot & aaddf 8\\
+amstore & y\\
+dup & amstore\\
+rot & \\
+amstore &\\
+\hline
+\end{tabular}
+}
+\end{center}
+
+As it is visible from the table, the meta-instructions (rhs) is significantly cleaner and requires less instructions.
+
+\subsection{Type Checking in Bytecode Instruction Level}
+While thinking about verification of types in the bytecode, we realized that pointers and expression at the location of the pointer (i.e. reference) are treated as the same in this implementation. This creates a problem which is the code (\ccb instructions) needs to be type-checked in different ways.
+
+%In order to see the problem cleanly, lets look at the sequence of bytecode instructions for \m{pair}.
+%
+%\begin{verbatim}
+% BB 10       # new 16          
+% 18 59       # dup             
+%<bytecode instructions for e1>
+% 20 4F       # amstore      
+% 21 59       # dup             
+% 22 62 08    # aaddf 8    
+%<bytecode instructions for e2>         
+% 26 4F       # amstore      
+% 27 B0       # return 
+%\end{verbatim}
+%
+%Let's remember that out array contains two 8 byte pointers to values it is storing. After generating instructions for $e_1$, we have the value of $e_1$, denoted by $e_1\downarrow$, on the stack. In the next step, we are storing $e_1\downarrow$ into the array. We are actually storing the pointer to $e_1\downarrow$. However, if we were to write types on the bytecode instructions, it would like we are storing $e_1\downarrow$.
+%
+%Here, we need to make some distinction between the expression and a pointer to an expression. We came up with three solutions to this problem. It is worth to mention here that this paper does not explore these solutions/options but only puts them forward for future work.
+%
+%First one of these solutions is to keep it as is and have an implicit value to pointer conversion whenever we use \m{amstore} operation. This option even though looks clean is still not very elegant since it requires implicit values. The second option is to add an \m{aaddf 0} instruction in front of every \m{amstore} instruction. Since additional \m{aaddf 0} instructions don't change the meaning of the program (this hasn't been proved, but this paper believes that it could be done easily with induction), adding \m{aaddf 0} instruction would be harmless and it would enable this expression to pointer conversion.
+
+\section{Conclusions}
+We have written parts of PCF to \ccb compiler. This work establishes a new perspective for 15-312 students to see their code in terms of \ccbi.
+
+\section{Acknowledgments}
+I would like to thank Robert J. Simmons for advising me through out this independent study.
+\section{Appendix}
+\input{appendix.tex}
+
+\nocite{*}
+\bibliographystyle{ieeetr}
+\bibliography{paper}{}
+
+\end{document}
+
