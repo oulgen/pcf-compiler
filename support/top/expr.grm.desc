@@ -1,0 +1,2612 @@
+
+state 0:
+
+	start : . step 
+	start : . eval 
+
+	EVAL	shift 4
+	STEP	shift 3
+
+	start	goto 181
+	eval	goto 2
+	step	goto 1
+
+	.	error
+
+
+state 1:
+
+	start : step .  (reduce by rule 0)
+
+
+
+	.	reduce by rule 0
+
+
+state 2:
+
+	start : eval .  (reduce by rule 1)
+
+
+
+	.	reduce by rule 1
+
+
+state 3:
+
+	step : STEP . exp 
+	step : STEP .  (reduce by rule 3)
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 17
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	reduce by rule 3
+
+
+state 4:
+
+	eval : EVAL . exp 
+	eval : EVAL .  (reduce by rule 5)
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 33
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	reduce by rule 5
+
+
+state 5:
+
+	atomic_exp : matchexp .  (reduce by rule 41)
+
+
+
+	.	reduce by rule 41
+
+
+state 6:
+
+	matchexp : matchstart . matchrules 
+
+	LBRACE	shift 36
+
+	matchfst	goto 35
+	matchrules	goto 34
+
+	.	error
+
+
+state 7:
+
+	atomic_exp : ifzexp .  (reduce by rule 37)
+
+
+
+	.	reduce by rule 37
+
+
+state 8:
+
+	atomic_exp : caseexp .  (reduce by rule 36)
+
+
+
+	.	reduce by rule 36
+
+
+state 9:
+
+	fixexp : fixstart . fix1 
+
+	IDENT	shift 39
+
+	addvar	goto 38
+	fix1	goto 37
+
+	.	error
+
+
+state 10:
+
+	lamexp : lamstart . lam1 
+
+	LPAREN	shift 41
+
+	lam1	goto 40
+
+	.	error
+
+
+state 11:
+
+	exp : fixexp .  (reduce by rule 23)
+
+
+
+	.	reduce by rule 23
+
+
+state 12:
+
+	exp : lamexp .  (reduce by rule 22)
+
+
+
+	.	reduce by rule 22
+
+
+state 13:
+
+	infix_exp : atomic_exp . atomic_exp_list 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	IFZ	shift 27
+	LET	shift 25
+	DOTL	shift 45
+	DOTR	shift 44
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	letexp	goto 16
+	letstart	goto 15
+	atomic_exp_list	goto 43
+	atomic_exp	goto 42
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	reduce by rule 29
+
+
+state 14:
+
+	exp : infix_exp .  (reduce by rule 21)
+
+
+
+	.	reduce by rule 21
+
+
+state 15:
+
+	letexp : letstart . decls letend 
+
+	VAL	shift 48
+
+	decls	goto 47
+	decl	goto 46
+
+	.	error
+
+
+state 16:
+
+	atomic_exp : letexp .  (reduce by rule 35)
+
+
+
+	.	reduce by rule 35
+
+
+state 17:
+
+	step : STEP exp .  (reduce by rule 2)
+
+
+
+	.	reduce by rule 2
+
+
+state 18:
+
+	atomic_exp : var .  (reduce by rule 34)
+
+
+
+	.	reduce by rule 34
+
+
+state 19:
+
+	matchstart : MATCH . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 49
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 20:
+
+	caseexp : CASE . exp stcase lcase midcase rcase endcase 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 50
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 21:
+
+	infix_exp : INR . sumtyp atomic_exp 
+
+	LBRACK	shift 52
+
+	sumtyp	goto 51
+
+	.	error
+
+
+state 22:
+
+	infix_exp : INL . sumtyp atomic_exp 
+
+	LBRACK	shift 52
+
+	sumtyp	goto 53
+
+	.	error
+
+
+state 23:
+
+	infix_exp : ABORT . LBRACK asc RBRACK atomic_exp 
+
+	LBRACK	shift 54
+
+
+	.	error
+
+
+state 24:
+
+	fixstart : FIX .  (reduce by rule 11)
+
+
+
+	.	reduce by rule 11
+
+
+state 25:
+
+	letstart : LET .  (reduce by rule 58)
+
+
+
+	.	reduce by rule 58
+
+
+state 26:
+
+	lamstart : LAM .  (reduce by rule 7)
+
+
+
+	.	reduce by rule 7
+
+
+state 27:
+
+	ifzexp : IFZ . exp stcase zifz midcase sifz endcase 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 55
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 28:
+
+	infix_exp : SUCC . atomic_exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	IFZ	shift 27
+	LET	shift 25
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	letexp	goto 16
+	letstart	goto 15
+	atomic_exp	goto 56
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 29:
+
+	atomic_exp : ZERO .  (reduce by rule 33)
+
+
+
+	.	reduce by rule 33
+
+
+state 30:
+
+	atomic_exp : LANGLE . RANGLE 
+	atomic_exp : LANGLE . exp COMMA exp RANGLE 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	RANGLE	shift 58
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 57
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 31:
+
+	atomic_exp : LPAREN . exp RPAREN 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 59
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 32:
+
+	var : IDENT .  (reduce by rule 43)
+
+
+
+	.	reduce by rule 43
+
+
+state 33:
+
+	eval : EVAL exp .  (reduce by rule 4)
+
+
+
+	.	reduce by rule 4
+
+
+state 34:
+
+	matchexp : matchstart matchrules .  (reduce by rule 63)
+
+
+
+	.	reduce by rule 63
+
+
+state 35:
+
+	matchrules : matchfst . exp matchrest 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 60
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 36:
+
+	matchfst : LBRACE . pat DARROW 
+
+	IDENT	shift 70
+	LPAREN	shift 69
+	LANGLE	shift 68
+	WILD	shift 67
+	ZERO	shift 66
+	SUCC	shift 65
+	INL	shift 64
+	INR	shift 63
+
+	pat	goto 62
+	atomic_pat	goto 61
+
+	.	error
+
+
+state 37:
+
+	fixexp : fixstart fix1 .  (reduce by rule 10)
+
+
+
+	.	reduce by rule 10
+
+
+state 38:
+
+	fix1 : addvar . COLON asc IS lamend 
+
+	COLON	shift 71
+
+
+	.	error
+
+
+state 39:
+
+	addvar : IDENT .  (reduce by rule 44)
+
+
+
+	.	reduce by rule 44
+
+
+state 40:
+
+	lamexp : lamstart lam1 .  (reduce by rule 6)
+
+
+
+	.	reduce by rule 6
+
+
+state 41:
+
+	lam1 : LPAREN . addvar COLON asc RPAREN lamend 
+
+	IDENT	shift 39
+
+	addvar	goto 72
+
+	.	error
+
+
+state 42:
+
+	atomic_exp_list : atomic_exp . atomic_exp_list 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	IFZ	shift 27
+	LET	shift 25
+	DOTL	shift 45
+	DOTR	shift 44
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	letexp	goto 16
+	letstart	goto 15
+	atomic_exp_list	goto 73
+	atomic_exp	goto 42
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	reduce by rule 29
+
+
+state 43:
+
+	infix_exp : atomic_exp atomic_exp_list .  (reduce by rule 24)
+
+
+
+	.	reduce by rule 24
+
+
+state 44:
+
+	atomic_exp_list : DOTR . atomic_exp_list 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	IFZ	shift 27
+	LET	shift 25
+	DOTL	shift 45
+	DOTR	shift 44
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	letexp	goto 16
+	letstart	goto 15
+	atomic_exp_list	goto 74
+	atomic_exp	goto 42
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	reduce by rule 29
+
+
+state 45:
+
+	atomic_exp_list : DOTL . atomic_exp_list 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	IFZ	shift 27
+	LET	shift 25
+	DOTL	shift 45
+	DOTR	shift 44
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	letexp	goto 16
+	letstart	goto 15
+	atomic_exp_list	goto 75
+	atomic_exp	goto 42
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	reduce by rule 29
+
+
+state 46:
+
+	decls : decl . decls 
+	decls : decl . IN exp 
+
+	VAL	shift 48
+	IN	shift 77
+
+	decls	goto 76
+	decl	goto 46
+
+	.	error
+
+
+state 47:
+
+	letexp : letstart decls . letend 
+
+	END	shift 79
+
+	letend	goto 78
+
+	.	error
+
+
+state 48:
+
+	decl : VAL . IDENT EQUALS exp 
+
+	IDENT	shift 80
+
+
+	.	error
+
+
+state 49:
+
+	matchstart : MATCH exp .  (reduce by rule 64)
+
+
+
+	.	reduce by rule 64
+
+
+state 50:
+
+	caseexp : CASE exp . stcase lcase midcase rcase endcase 
+
+	LBRACE	shift 82
+
+	stcase	goto 81
+
+	.	error
+
+
+state 51:
+
+	infix_exp : INR sumtyp . atomic_exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	IFZ	shift 27
+	LET	shift 25
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	letexp	goto 16
+	letstart	goto 15
+	atomic_exp	goto 83
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 52:
+
+	sumtyp : LBRACK . asc COMMA asc RBRACK 
+
+	LPAREN	shift 89
+	NAT	shift 88
+	UNIT	shift 87
+	VOID	shift 86
+
+	asc	goto 85
+	ascBase	goto 84
+
+	.	error
+
+
+state 53:
+
+	infix_exp : INL sumtyp . atomic_exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	IFZ	shift 27
+	LET	shift 25
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	letexp	goto 16
+	letstart	goto 15
+	atomic_exp	goto 90
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 54:
+
+	infix_exp : ABORT LBRACK . asc RBRACK atomic_exp 
+
+	LPAREN	shift 89
+	NAT	shift 88
+	UNIT	shift 87
+	VOID	shift 86
+
+	asc	goto 91
+	ascBase	goto 84
+
+	.	error
+
+
+state 55:
+
+	ifzexp : IFZ exp . stcase zifz midcase sifz endcase 
+
+	LBRACE	shift 82
+
+	stcase	goto 92
+
+	.	error
+
+
+state 56:
+
+	infix_exp : SUCC atomic_exp .  (reduce by rule 25)
+
+
+
+	.	reduce by rule 25
+
+
+state 57:
+
+	atomic_exp : LANGLE exp . COMMA exp RANGLE 
+
+	COMMA	shift 93
+
+
+	.	error
+
+
+state 58:
+
+	atomic_exp : LANGLE RANGLE .  (reduce by rule 38)
+
+
+
+	.	reduce by rule 38
+
+
+state 59:
+
+	atomic_exp : LPAREN exp . RPAREN 
+
+	RPAREN	shift 94
+
+
+	.	error
+
+
+state 60:
+
+	matchrules : matchfst exp . matchrest 
+
+	RBRACE	shift 99
+	BAR	shift 98
+
+	matchsnd	goto 97
+	matchrest	goto 96
+	matchend	goto 95
+
+	.	error
+
+
+state 61:
+
+	pat : atomic_pat .  (reduce by rule 74)
+
+
+
+	.	reduce by rule 74
+
+
+state 62:
+
+	matchfst : LBRACE pat . DARROW 
+
+	DARROW	shift 100
+
+
+	.	error
+
+
+state 63:
+
+	pat : INR . atomic_pat 
+
+	IDENT	shift 70
+	LPAREN	shift 69
+	LANGLE	shift 68
+	WILD	shift 67
+	ZERO	shift 66
+
+	atomic_pat	goto 101
+
+	.	error
+
+
+state 64:
+
+	pat : INL . atomic_pat 
+
+	IDENT	shift 70
+	LPAREN	shift 69
+	LANGLE	shift 68
+	WILD	shift 67
+	ZERO	shift 66
+
+	atomic_pat	goto 102
+
+	.	error
+
+
+state 65:
+
+	pat : SUCC . atomic_pat 
+
+	IDENT	shift 70
+	LPAREN	shift 69
+	LANGLE	shift 68
+	WILD	shift 67
+	ZERO	shift 66
+
+	atomic_pat	goto 103
+
+	.	error
+
+
+state 66:
+
+	atomic_pat : ZERO .  (reduce by rule 77)
+
+
+
+	.	reduce by rule 77
+
+
+state 67:
+
+	atomic_pat : WILD .  (reduce by rule 75)
+
+
+
+	.	reduce by rule 75
+
+
+state 68:
+
+	atomic_pat : LANGLE . RANGLE 
+	atomic_pat : LANGLE . pat COMMA pat RANGLE 
+
+	IDENT	shift 70
+	LPAREN	shift 69
+	LANGLE	shift 68
+	RANGLE	shift 105
+	WILD	shift 67
+	ZERO	shift 66
+	SUCC	shift 65
+	INL	shift 64
+	INR	shift 63
+
+	pat	goto 104
+	atomic_pat	goto 61
+
+	.	error
+
+
+state 69:
+
+	atomic_pat : LPAREN . pat RPAREN 
+
+	IDENT	shift 70
+	LPAREN	shift 69
+	LANGLE	shift 68
+	WILD	shift 67
+	ZERO	shift 66
+	SUCC	shift 65
+	INL	shift 64
+	INR	shift 63
+
+	pat	goto 106
+	atomic_pat	goto 61
+
+	.	error
+
+
+state 70:
+
+	atomic_pat : IDENT .  (reduce by rule 76)
+
+
+
+	.	reduce by rule 76
+
+
+state 71:
+
+	fix1 : addvar COLON . asc IS lamend 
+
+	LPAREN	shift 89
+	NAT	shift 88
+	UNIT	shift 87
+	VOID	shift 86
+
+	asc	goto 107
+	ascBase	goto 84
+
+	.	error
+
+
+state 72:
+
+	lam1 : LPAREN addvar . COLON asc RPAREN lamend 
+
+	COLON	shift 108
+
+
+	.	error
+
+
+state 73:
+
+	atomic_exp_list : atomic_exp atomic_exp_list .  (reduce by rule 32)
+
+
+
+	.	reduce by rule 32
+
+
+state 74:
+
+	atomic_exp_list : DOTR atomic_exp_list .  (reduce by rule 31)
+
+
+
+	.	reduce by rule 31
+
+
+state 75:
+
+	atomic_exp_list : DOTL atomic_exp_list .  (reduce by rule 30)
+
+
+
+	.	reduce by rule 30
+
+
+state 76:
+
+	decls : decl decls .  (reduce by rule 59)
+
+
+
+	.	reduce by rule 59
+
+
+state 77:
+
+	decls : decl IN . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 109
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 78:
+
+	letexp : letstart decls letend .  (reduce by rule 57)
+
+
+
+	.	reduce by rule 57
+
+
+state 79:
+
+	letend : END .  (reduce by rule 62)
+
+
+
+	.	reduce by rule 62
+
+
+state 80:
+
+	decl : VAL IDENT . EQUALS exp 
+
+	EQUALS	shift 110
+
+
+	.	error
+
+
+state 81:
+
+	caseexp : CASE exp stcase . lcase midcase rcase endcase 
+
+	INL	shift 112
+
+	lcase	goto 111
+
+	.	error
+
+
+state 82:
+
+	stcase : LBRACE .  (reduce by rule 50)
+
+
+
+	.	reduce by rule 50
+
+
+state 83:
+
+	infix_exp : INR sumtyp atomic_exp .  (reduce by rule 27)
+
+
+
+	.	reduce by rule 27
+
+
+state 84:
+
+	asc : ascBase . TIMES asc 
+	asc : ascBase . PLUS asc 
+	asc : ascBase . ARROW asc 
+	asc : ascBase .  (reduce by rule 20)
+
+	ARROW	shift 115
+	TIMES	shift 114
+	PLUS	shift 113
+
+
+	.	reduce by rule 20
+
+
+state 85:
+
+	sumtyp : LBRACK asc . COMMA asc RBRACK 
+
+	COMMA	shift 116
+
+
+	.	error
+
+
+state 86:
+
+	ascBase : VOID .  (reduce by rule 15)
+
+
+
+	.	reduce by rule 15
+
+
+state 87:
+
+	ascBase : UNIT .  (reduce by rule 14)
+
+
+
+	.	reduce by rule 14
+
+
+state 88:
+
+	ascBase : NAT .  (reduce by rule 13)
+
+
+
+	.	reduce by rule 13
+
+
+state 89:
+
+	ascBase : LPAREN . asc RPAREN 
+
+	LPAREN	shift 89
+	NAT	shift 88
+	UNIT	shift 87
+	VOID	shift 86
+
+	asc	goto 117
+	ascBase	goto 84
+
+	.	error
+
+
+state 90:
+
+	infix_exp : INL sumtyp atomic_exp .  (reduce by rule 26)
+
+
+
+	.	reduce by rule 26
+
+
+state 91:
+
+	infix_exp : ABORT LBRACK asc . RBRACK atomic_exp 
+
+	RBRACK	shift 118
+
+
+	.	error
+
+
+state 92:
+
+	ifzexp : IFZ exp stcase . zifz midcase sifz endcase 
+
+	ZERO	shift 120
+
+	zifz	goto 119
+
+	.	error
+
+
+state 93:
+
+	atomic_exp : LANGLE exp COMMA . exp RANGLE 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 121
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 94:
+
+	atomic_exp : LPAREN exp RPAREN .  (reduce by rule 40)
+
+
+
+	.	reduce by rule 40
+
+
+state 95:
+
+	matchrest : matchend .  (reduce by rule 67)
+
+
+
+	.	reduce by rule 67
+
+
+state 96:
+
+	matchrules : matchfst exp matchrest .  (reduce by rule 65)
+
+
+
+	.	reduce by rule 65
+
+
+state 97:
+
+	matchrest : matchsnd . exp matchrest 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 122
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 98:
+
+	matchsnd : BAR . pat DARROW 
+
+	IDENT	shift 70
+	LPAREN	shift 69
+	LANGLE	shift 68
+	WILD	shift 67
+	ZERO	shift 66
+	SUCC	shift 65
+	INL	shift 64
+	INR	shift 63
+
+	pat	goto 123
+	atomic_pat	goto 61
+
+	.	error
+
+
+state 99:
+
+	matchend : RBRACE .  (reduce by rule 70)
+
+
+
+	.	reduce by rule 70
+
+
+state 100:
+
+	matchfst : LBRACE pat DARROW .  (reduce by rule 68)
+
+
+
+	.	reduce by rule 68
+
+
+state 101:
+
+	pat : INR atomic_pat .  (reduce by rule 72)
+
+
+
+	.	reduce by rule 72
+
+
+state 102:
+
+	pat : INL atomic_pat .  (reduce by rule 71)
+
+
+
+	.	reduce by rule 71
+
+
+state 103:
+
+	pat : SUCC atomic_pat .  (reduce by rule 73)
+
+
+
+	.	reduce by rule 73
+
+
+state 104:
+
+	atomic_pat : LANGLE pat . COMMA pat RANGLE 
+
+	COMMA	shift 124
+
+
+	.	error
+
+
+state 105:
+
+	atomic_pat : LANGLE RANGLE .  (reduce by rule 78)
+
+
+
+	.	reduce by rule 78
+
+
+state 106:
+
+	atomic_pat : LPAREN pat . RPAREN 
+
+	RPAREN	shift 125
+
+
+	.	error
+
+
+state 107:
+
+	fix1 : addvar COLON asc . IS lamend 
+
+	IS	shift 126
+
+
+	.	error
+
+
+state 108:
+
+	lam1 : LPAREN addvar COLON . asc RPAREN lamend 
+
+	LPAREN	shift 89
+	NAT	shift 88
+	UNIT	shift 87
+	VOID	shift 86
+
+	asc	goto 127
+	ascBase	goto 84
+
+	.	error
+
+
+state 109:
+
+	decls : decl IN exp .  (reduce by rule 60)
+
+
+
+	.	reduce by rule 60
+
+
+state 110:
+
+	decl : VAL IDENT EQUALS . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 128
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 111:
+
+	caseexp : CASE exp stcase lcase . midcase rcase endcase 
+
+	BAR	shift 130
+
+	midcase	goto 129
+
+	.	error
+
+
+state 112:
+
+	lcase : INL . LPAREN addvar RPAREN DARROW exp 
+	lcase : INL . addvar DARROW exp 
+
+	IDENT	shift 39
+	LPAREN	shift 132
+
+	addvar	goto 131
+
+	.	error
+
+
+state 113:
+
+	asc : ascBase PLUS . asc 
+
+	LPAREN	shift 89
+	NAT	shift 88
+	UNIT	shift 87
+	VOID	shift 86
+
+	asc	goto 133
+	ascBase	goto 84
+
+	.	error
+
+
+state 114:
+
+	asc : ascBase TIMES . asc 
+
+	LPAREN	shift 89
+	NAT	shift 88
+	UNIT	shift 87
+	VOID	shift 86
+
+	asc	goto 134
+	ascBase	goto 84
+
+	.	error
+
+
+state 115:
+
+	asc : ascBase ARROW . asc 
+
+	LPAREN	shift 89
+	NAT	shift 88
+	UNIT	shift 87
+	VOID	shift 86
+
+	asc	goto 135
+	ascBase	goto 84
+
+	.	error
+
+
+state 116:
+
+	sumtyp : LBRACK asc COMMA . asc RBRACK 
+
+	LPAREN	shift 89
+	NAT	shift 88
+	UNIT	shift 87
+	VOID	shift 86
+
+	asc	goto 136
+	ascBase	goto 84
+
+	.	error
+
+
+state 117:
+
+	ascBase : LPAREN asc . RPAREN 
+
+	RPAREN	shift 137
+
+
+	.	error
+
+
+state 118:
+
+	infix_exp : ABORT LBRACK asc RBRACK . atomic_exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	IFZ	shift 27
+	LET	shift 25
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	letexp	goto 16
+	letstart	goto 15
+	atomic_exp	goto 138
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 119:
+
+	ifzexp : IFZ exp stcase zifz . midcase sifz endcase 
+
+	BAR	shift 130
+
+	midcase	goto 139
+
+	.	error
+
+
+state 120:
+
+	zifz : ZERO . DARROW exp 
+
+	DARROW	shift 140
+
+
+	.	error
+
+
+state 121:
+
+	atomic_exp : LANGLE exp COMMA exp . RANGLE 
+
+	RANGLE	shift 141
+
+
+	.	error
+
+
+state 122:
+
+	matchrest : matchsnd exp . matchrest 
+
+	RBRACE	shift 99
+	BAR	shift 98
+
+	matchsnd	goto 97
+	matchrest	goto 142
+	matchend	goto 95
+
+	.	error
+
+
+state 123:
+
+	matchsnd : BAR pat . DARROW 
+
+	DARROW	shift 143
+
+
+	.	error
+
+
+state 124:
+
+	atomic_pat : LANGLE pat COMMA . pat RANGLE 
+
+	IDENT	shift 70
+	LPAREN	shift 69
+	LANGLE	shift 68
+	WILD	shift 67
+	ZERO	shift 66
+	SUCC	shift 65
+	INL	shift 64
+	INR	shift 63
+
+	pat	goto 144
+	atomic_pat	goto 61
+
+	.	error
+
+
+state 125:
+
+	atomic_pat : LPAREN pat RPAREN .  (reduce by rule 80)
+
+
+
+	.	reduce by rule 80
+
+
+state 126:
+
+	fix1 : addvar COLON asc IS . lamend 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 146
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	lamend	goto 145
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 127:
+
+	lam1 : LPAREN addvar COLON asc . RPAREN lamend 
+
+	RPAREN	shift 147
+
+
+	.	error
+
+
+state 128:
+
+	decl : VAL IDENT EQUALS exp .  (reduce by rule 61)
+
+
+
+	.	reduce by rule 61
+
+
+state 129:
+
+	caseexp : CASE exp stcase lcase midcase . rcase endcase 
+
+	INR	shift 149
+
+	rcase	goto 148
+
+	.	error
+
+
+state 130:
+
+	midcase : BAR .  (reduce by rule 51)
+
+
+
+	.	reduce by rule 51
+
+
+state 131:
+
+	lcase : INL addvar . DARROW exp 
+
+	DARROW	shift 150
+
+
+	.	error
+
+
+state 132:
+
+	lcase : INL LPAREN . addvar RPAREN DARROW exp 
+
+	IDENT	shift 39
+
+	addvar	goto 151
+
+	.	error
+
+
+state 133:
+
+	asc : ascBase PLUS asc .  (reduce by rule 18)
+
+
+
+	.	reduce by rule 18
+
+
+state 134:
+
+	asc : ascBase TIMES asc .  (reduce by rule 17)
+
+
+
+	.	reduce by rule 17
+
+
+state 135:
+
+	asc : ascBase ARROW asc .  (reduce by rule 19)
+
+
+
+	.	reduce by rule 19
+
+
+state 136:
+
+	sumtyp : LBRACK asc COMMA asc . RBRACK 
+
+	RBRACK	shift 152
+
+
+	.	error
+
+
+state 137:
+
+	ascBase : LPAREN asc RPAREN .  (reduce by rule 16)
+
+
+
+	.	reduce by rule 16
+
+
+state 138:
+
+	infix_exp : ABORT LBRACK asc RBRACK atomic_exp .  (reduce by rule 28)
+
+
+
+	.	reduce by rule 28
+
+
+state 139:
+
+	ifzexp : IFZ exp stcase zifz midcase . sifz endcase 
+
+	SUCC	shift 154
+
+	sifz	goto 153
+
+	.	error
+
+
+state 140:
+
+	zifz : ZERO DARROW . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 155
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 141:
+
+	atomic_exp : LANGLE exp COMMA exp RANGLE .  (reduce by rule 39)
+
+
+
+	.	reduce by rule 39
+
+
+state 142:
+
+	matchrest : matchsnd exp matchrest .  (reduce by rule 66)
+
+
+
+	.	reduce by rule 66
+
+
+state 143:
+
+	matchsnd : BAR pat DARROW .  (reduce by rule 69)
+
+
+
+	.	reduce by rule 69
+
+
+state 144:
+
+	atomic_pat : LANGLE pat COMMA pat . RANGLE 
+
+	RANGLE	shift 156
+
+
+	.	error
+
+
+state 145:
+
+	fix1 : addvar COLON asc IS lamend .  (reduce by rule 12)
+
+
+
+	.	reduce by rule 12
+
+
+state 146:
+
+	lamend : exp .  (reduce by rule 9)
+
+
+
+	.	reduce by rule 9
+
+
+state 147:
+
+	lam1 : LPAREN addvar COLON asc RPAREN . lamend 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 146
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	lamend	goto 157
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 148:
+
+	caseexp : CASE exp stcase lcase midcase rcase . endcase 
+
+	RBRACE	shift 159
+
+	endcase	goto 158
+
+	.	error
+
+
+state 149:
+
+	rcase : INR . LPAREN addvar RPAREN DARROW exp 
+	rcase : INR . addvar DARROW exp 
+
+	IDENT	shift 39
+	LPAREN	shift 161
+
+	addvar	goto 160
+
+	.	error
+
+
+state 150:
+
+	lcase : INL addvar DARROW . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 162
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 151:
+
+	lcase : INL LPAREN addvar . RPAREN DARROW exp 
+
+	RPAREN	shift 163
+
+
+	.	error
+
+
+state 152:
+
+	sumtyp : LBRACK asc COMMA asc RBRACK .  (reduce by rule 42)
+
+
+
+	.	reduce by rule 42
+
+
+state 153:
+
+	ifzexp : IFZ exp stcase zifz midcase sifz . endcase 
+
+	RBRACE	shift 159
+
+	endcase	goto 164
+
+	.	error
+
+
+state 154:
+
+	sifz : SUCC . LPAREN addvar RPAREN DARROW exp 
+	sifz : SUCC . addvar DARROW exp 
+
+	IDENT	shift 39
+	LPAREN	shift 166
+
+	addvar	goto 165
+
+	.	error
+
+
+state 155:
+
+	zifz : ZERO DARROW exp .  (reduce by rule 54)
+
+
+
+	.	reduce by rule 54
+
+
+state 156:
+
+	atomic_pat : LANGLE pat COMMA pat RANGLE .  (reduce by rule 79)
+
+
+
+	.	reduce by rule 79
+
+
+state 157:
+
+	lam1 : LPAREN addvar COLON asc RPAREN lamend .  (reduce by rule 8)
+
+
+
+	.	reduce by rule 8
+
+
+state 158:
+
+	caseexp : CASE exp stcase lcase midcase rcase endcase .  (reduce by rule 45)
+
+
+
+	.	reduce by rule 45
+
+
+state 159:
+
+	endcase : RBRACE .  (reduce by rule 52)
+
+
+
+	.	reduce by rule 52
+
+
+state 160:
+
+	rcase : INR addvar . DARROW exp 
+
+	DARROW	shift 167
+
+
+	.	error
+
+
+state 161:
+
+	rcase : INR LPAREN . addvar RPAREN DARROW exp 
+
+	IDENT	shift 39
+
+	addvar	goto 168
+
+	.	error
+
+
+state 162:
+
+	lcase : INL addvar DARROW exp .  (reduce by rule 47)
+
+
+
+	.	reduce by rule 47
+
+
+state 163:
+
+	lcase : INL LPAREN addvar RPAREN . DARROW exp 
+
+	DARROW	shift 169
+
+
+	.	error
+
+
+state 164:
+
+	ifzexp : IFZ exp stcase zifz midcase sifz endcase .  (reduce by rule 53)
+
+
+
+	.	reduce by rule 53
+
+
+state 165:
+
+	sifz : SUCC addvar . DARROW exp 
+
+	DARROW	shift 170
+
+
+	.	error
+
+
+state 166:
+
+	sifz : SUCC LPAREN . addvar RPAREN DARROW exp 
+
+	IDENT	shift 39
+
+	addvar	goto 171
+
+	.	error
+
+
+state 167:
+
+	rcase : INR addvar DARROW . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 172
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 168:
+
+	rcase : INR LPAREN addvar . RPAREN DARROW exp 
+
+	RPAREN	shift 173
+
+
+	.	error
+
+
+state 169:
+
+	lcase : INL LPAREN addvar RPAREN DARROW . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 174
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 170:
+
+	sifz : SUCC addvar DARROW . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 175
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 171:
+
+	sifz : SUCC LPAREN addvar . RPAREN DARROW exp 
+
+	RPAREN	shift 176
+
+
+	.	error
+
+
+state 172:
+
+	rcase : INR addvar DARROW exp .  (reduce by rule 49)
+
+
+
+	.	reduce by rule 49
+
+
+state 173:
+
+	rcase : INR LPAREN addvar RPAREN . DARROW exp 
+
+	DARROW	shift 177
+
+
+	.	error
+
+
+state 174:
+
+	lcase : INL LPAREN addvar RPAREN DARROW exp .  (reduce by rule 46)
+
+
+
+	.	reduce by rule 46
+
+
+state 175:
+
+	sifz : SUCC addvar DARROW exp .  (reduce by rule 56)
+
+
+
+	.	reduce by rule 56
+
+
+state 176:
+
+	sifz : SUCC LPAREN addvar RPAREN . DARROW exp 
+
+	DARROW	shift 178
+
+
+	.	error
+
+
+state 177:
+
+	rcase : INR LPAREN addvar RPAREN DARROW . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 179
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 178:
+
+	sifz : SUCC LPAREN addvar RPAREN DARROW . exp 
+
+	IDENT	shift 32
+	LPAREN	shift 31
+	LANGLE	shift 30
+	ZERO	shift 29
+	SUCC	shift 28
+	IFZ	shift 27
+	LAM	shift 26
+	LET	shift 25
+	FIX	shift 24
+	ABORT	shift 23
+	INL	shift 22
+	INR	shift 21
+	CASE	shift 20
+	MATCH	shift 19
+
+	var	goto 18
+	exp	goto 180
+	letexp	goto 16
+	letstart	goto 15
+	infix_exp	goto 14
+	atomic_exp	goto 13
+	lamexp	goto 12
+	fixexp	goto 11
+	lamstart	goto 10
+	fixstart	goto 9
+	caseexp	goto 8
+	ifzexp	goto 7
+	matchstart	goto 6
+	matchexp	goto 5
+
+	.	error
+
+
+state 179:
+
+	rcase : INR LPAREN addvar RPAREN DARROW exp .  (reduce by rule 48)
+
+
+
+	.	reduce by rule 48
+
+
+state 180:
+
+	sifz : SUCC LPAREN addvar RPAREN DARROW exp .  (reduce by rule 55)
+
+
+
+	.	reduce by rule 55
+
+
+state 181:
+
+
+	EOF	accept
+	SEMI	accept
+
+
+	.	error
+
+160 of 710 action table entries left after compaction
+433 goto table entries

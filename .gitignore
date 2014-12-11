@@ -4,3 +4,7 @@
 Session.vim
 .netrwhist
 *~
+*.bc0
+*.pdf
+*.jpg
+*.jpeg

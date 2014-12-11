@@ -1,0 +1,237 @@
+structure T = Term
+structure TY = Type
+structure TO = TypeOps
+structure TLC = TopLevelCommands
+exception Parse of string
+		                 
+datatype apples = Dotl | Dotr | Atomic of Term.t
+
+fun despine (exp, []) = exp
+  | despine (exp, Dotl :: spine) = despine (Lang.PrL exp, spine)
+  | despine (exp, Dotr :: spine) = despine (Lang.PrR exp, spine)
+  | despine (exp, Atomic arg :: spine) =
+       despine (T.$$(TermOps.Ap, [exp, arg]), spine)
+
+fun addpatvars newvars usedvars = 
+   case newvars of 
+      [] => []
+    | (newvar :: newvars) => 
+      (if List.exists (fn x => x = newvar) usedvars
+       then raise Parse ("Variable '" ^ newvar ^
+                         "' used more than once in pattern")
+       else (ParserState.addvar newvar 
+             :: addpatvars newvars (newvar :: usedvars)))
+
+fun patwrapper (pat, vars) exp = (pat, List.foldr T.\\ exp vars)
+
+%%
+(* %header (functor LangLrValsFn (structure Token : TOKEN)) *)
+
+
+%term EOF | EVAL | STEP | LOAD | IDENT of string | SEMI 
+ | LPAREN | RPAREN | LBRACK | RBRACK | LBRACE | RBRACE | LANGLE | RANGLE
+ | ARROW | DARROW | EQUALS | BAR | COLON | VAL | IN | IS | END | COMMA | WILD
+ | NAT | UNIT | TIMES | VOID | PLUS 
+ | ZERO | SUCC | NUM of int | IFZ | LAM | LET | FIX 
+ | DOTL | DOTR | ABORT | INL | INR | CASE | MATCH 
+
+%nonterm start of TLC.cmd | eval of TLC.cmd | step of TLC.cmd |
+         var of T.t | addvar of Var.t | 
+         exp of Term.t |
+         letexp of T.t | letstart of unit |
+         decls of T.t | decl of Term.t * Var.t  |
+         letend of unit | asc of TY.t | sumtyp of TY.t * TY.t |
+         infix_exp of T.t | atomic_exp_list of apples list | atomic_exp of T.t |
+         lamexp of T.t | fixexp of T.t |  
+         lamstart of unit |  lam1 of T.t |
+         fixstart of unit |  fix1 of T.t |
+         lamend of T.t |
+         caseexp of T.t | lcase of Var.t * T.t | rcase of Var.t * T.t |
+         ifzexp of T.t | zifz of T.t | sifz of Var.t * T.t |
+         stcase of unit | midcase of unit  | endcase of unit |
+         maybeasc of Type.t option | explist of T.t | 
+         matchstart of T.t | 
+         matchexp of T.t |
+         matchfst of Pattern.t * Var.t list |
+         matchsnd of Pattern.t * Var.t list |
+         matchrest of (Pattern.t * T.t) list |
+         matchrules of (Pattern.t * T.t) list | matchend of unit | 
+         pat of string list * Pattern.t | 
+         atomic_pat of string list * Pattern.t | 
+         matchmid of Var.t list | 
+         matchpatternlist of T.t | matchpatternvar of T.t | ascBase of TY.t 
+		 
+%verbose
+%pos int
+%start start
+%eop EOF SEMI
+%noshift EOF SEMI
+%name Exp
+%left EQUALS
+%left COLON
+%left PLUS 
+%left TIMES
+%right ARROW 
+
+%% 
+
+start    : step                   (step)
+         | eval                   (eval)
+
+step     : STEP exp               (TLC.Step(SOME(exp)))
+         | STEP                   (TLC.Step(NONE))
+
+eval     : EVAL exp               (TLC.Eval(SOME(exp)))
+         | EVAL                   (TLC.Eval(NONE))
+
+lamexp   : lamstart lam1          (lam1)
+          
+lamstart : LAM                    (ParserState.savetable())
+
+lam1     : LPAREN addvar COLON asc RPAREN lamend   
+                                  (Lang.Lam (addvar,asc) lamend)
+                               
+lamend   : exp                    (ParserState.restoretable(); exp)
+
+fixexp   : fixstart fix1          (fix1)
+          
+fixstart : FIX                    (ParserState.savetable())
+
+fix1     : addvar COLON asc IS lamend   
+                                  (Lang.Fix (addvar,asc) lamend)
+
+ascBase  : NAT                    (TY.$$(TO.NAT, []))
+         | UNIT                   (TY.$$(TO.UNIT,[]))
+         | VOID                   (TY.$$(TO.VOID, []))
+         | LPAREN asc RPAREN      (asc)
+
+asc      : ascBase TIMES asc      (TY.$$(TO.PROD, [ascBase,asc]))
+         | ascBase PLUS asc       (TY.$$(TO.SUM, [ascBase,asc]))
+         | ascBase ARROW asc      (TY.$$(TO.PARR, [ascBase,asc]))
+         | ascBase                ((TextIO.print(""));ascBase)
+        
+exp      : infix_exp              (infix_exp)
+         | lamexp                 (lamexp)
+         | fixexp                 (fixexp)
+                                
+infix_exp 
+         : atomic_exp atomic_exp_list
+                                  (despine (atomic_exp, atomic_exp_list))
+         | SUCC atomic_exp        (T.$$(TermOps.S,[atomic_exp]))
+         | INL sumtyp atomic_exp  (Lang.InL sumtyp atomic_exp)
+         | INR sumtyp atomic_exp  (Lang.InR sumtyp atomic_exp)
+         | ABORT LBRACK asc RBRACK atomic_exp 
+                                  (Lang.Abort asc atomic_exp)
+          
+atomic_exp_list
+         :                        ([])
+         | DOTL atomic_exp_list   (Dotl :: atomic_exp_list)
+         | DOTR atomic_exp_list   (Dotr :: atomic_exp_list)
+         | atomic_exp atomic_exp_list
+                                  (Atomic atomic_exp :: atomic_exp_list)
+
+atomic_exp 
+         : ZERO                   (T.$$(TermOps.Z,[]))
+         | var                    (var)
+         | letexp                 (letexp)
+         | caseexp                (caseexp)
+         | ifzexp                 (ifzexp)
+         | LANGLE RANGLE          (T.$$(TermOps.Triv,[]))
+         | LANGLE exp COMMA exp RANGLE 
+                                  (T.$$(TermOps.Pair,[exp1,exp2]))
+         | LPAREN exp RPAREN      (exp)        
+         | matchexp               (matchexp)
+
+sumtyp   : LBRACK asc COMMA asc RBRACK ((asc1,asc2))
+
+var      : IDENT                  (T.`` (ParserState.getvar IDENT))
+
+addvar   : IDENT                  (ParserState.addvar IDENT)
+
+(* CASE EXPRESSIONS *)
+
+caseexp  : CASE exp stcase lcase midcase rcase  endcase     
+                                  (Lang.Case exp lcase rcase)
+
+lcase    : INL LPAREN addvar RPAREN DARROW exp ((addvar,exp))
+         | INL addvar DARROW exp  ((addvar,exp))
+
+rcase    : INR LPAREN addvar RPAREN DARROW exp ((addvar,exp))
+         | INR addvar DARROW exp  ((addvar,exp))
+
+stcase   : LBRACE                 (ParserState.savetable())
+
+midcase  : BAR                    (ParserState.restoretable();
+                                   ParserState.savetable())
+
+endcase  : RBRACE                 (ParserState.restoretable())
+
+(* IFZ EXPRESSIONS *)
+                
+ifzexp   : IFZ exp stcase zifz midcase sifz  endcase     
+                                  (Lang.Ifz exp zifz sifz)
+
+zifz     : ZERO DARROW exp        (exp)
+
+sifz     : SUCC LPAREN addvar RPAREN DARROW exp 
+                                  ((addvar,exp))
+         | SUCC addvar DARROW exp ((addvar, exp))
+
+(* LET EXPRESSIONS *)
+
+letexp   : letstart decls letend  (decls) 
+
+letstart : LET                    (ParserState.savetable())
+
+decls    : decl decls             (Lang.Let decl decls)
+         | decl IN exp            (Lang.Let decl exp)
+        
+(* Note: we don't want to add the var until *after* we parse the decl!
+ * That's why we parse the IDENT instead of using addvar. *)
+decl     : VAL IDENT EQUALS exp   ((exp, ParserState.addvar IDENT))
+
+letend   : END                    (ParserState.restoretable())
+
+(* MATCH EXPRESSIONS *)
+
+matchexp : matchstart matchrules  (Lang.Match matchstart matchrules)
+                                (* T.t *)
+                                  
+matchstart : MATCH exp            ((ParserState.savetable()); exp)
+                                (* T.t *)
+                                
+matchrules
+         : matchfst exp matchrest (patwrapper matchfst exp :: matchrest)
+(*       | LBRACE matchend        ([]) 
+ * Note: we have to have at least one branch of the case statement and use 
+ * abort for void type: otherwise we don't know what type to elimiate to. *)
+
+matchrest 
+         : matchsnd exp matchrest (patwrapper matchsnd exp :: matchrest)
+         | matchend               ([])
+
+matchfst : LBRACE pat DARROW      ((#2 pat, addpatvars (#1 pat) []))
+
+matchsnd : BAR pat DARROW         (ParserState.restoretable();
+                                   ParserState.savetable();
+                                   (#2 pat, addpatvars (#1 pat) []))
+
+matchend : RBRACE                 (ParserState.restoretable())      
+                                 
+pat      : INL atomic_pat         ((#1 atomic_pat, 
+                                    Pattern.In (Pattern.L, #2 atomic_pat)))
+         | INR atomic_pat         ((#1 atomic_pat,
+                                    Pattern.In (Pattern.R, #2 atomic_pat)))
+         | SUCC atomic_pat        ((#1 atomic_pat,
+                                    Pattern.S (#2 atomic_pat)))
+         | atomic_pat             (atomic_pat)
+
+atomic_pat 
+         : WILD                   ([], Pattern.Wild)
+         | IDENT                  ([IDENT], Pattern.Var)
+         | ZERO                   ([], Pattern.Z)
+         | LANGLE RANGLE          ([], Pattern.Triv)
+         | LANGLE pat COMMA pat RANGLE 
+                                  (#1 pat1 @ #1 pat2, 
+                                   Pattern.Pair (#2 pat1, #2 pat2))
+         | LPAREN pat RPAREN      (pat)

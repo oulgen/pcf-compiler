@@ -1,0 +1,2 @@
+Skeleton 5
+d2f2d"String"d"ParserState"ad"Parse"h3aä¢ExpLrVals"jh1aä¢Token"gp2ä¢LrParser"ÿ7gp1e"ExpLrValsFun"aä¢Lex"jh1aä¢Tokens"gp2ÿ'ÿ,gp1e"Exp_LexFun"ad"ExpP"jh3aä¢ParserData"gp2ÿ'ÿ‚aÿ"gp1ÿ"aÿgp1ÿgp1e"Join"
